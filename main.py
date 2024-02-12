@@ -6,15 +6,12 @@ import requests
 
 pygame.font.init()
 
-toponym_to_find = 'спб'
-
-delta = 0.005
+toponym_to_find = 'россия'
 
 width, height = 800, 800
 screen = pygame.display.set_mode((width, height))
 font = pygame.font.Font(None, 32)
-clock = pygame.time.Clock()
-input_box = pygame.Rect(100, 100, 140, 32)
+input_box = pygame.Rect(50, 50, 150, 32)
 color_inactive = pygame.Color('lightskyblue3')
 color_active = pygame.Color('dodgerblue2')
 color = color_inactive
@@ -45,14 +42,33 @@ toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["
 toponym_coodrinates = toponym["Point"]["pos"]
 toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
 
+delta = 0.005
+
+l = 'map'
+
 map_params = {
     "ll": ",".join([toponym_longitude, toponym_lattitude]),
     "spn": ",".join([str(delta), str(delta)]),
-    "l": "map"
+    "l": l
 }
 response = requests.get(map_api_server, params=map_params)
+
+search_image = pygame.image.load('magnifying.png')
+search_image = pygame.transform.scale(search_image, (75, 75))
+search_image_rect = pygame.Rect((300, 25), (75, 75))
 map_image = pygame.image.load(BytesIO(response.content))
-map_image = pygame.transform.scale(map_image, (500, 500))
+map_icon = pygame.image.load('map.png')
+map_icon = pygame.transform.scale(map_icon, (75, 75))
+
+sat_icon = pygame.image.load('sat.jpg')
+sat_icon = pygame.transform.scale(sat_icon, (75, 75))
+
+gib_icon = pygame.image.load('gibrid.jpg')
+gib_icon = pygame.transform.scale(gib_icon, (75, 75))
+
+map_icon_rect = pygame.Rect((550, 262), (75, 75))
+sat_icon_rect = pygame.Rect((550, 362), (75, 75))
+gib_icon_rect = pygame.Rect((550, 462), (75, 75))
 # Game loop.
 
 while True:
@@ -63,31 +79,46 @@ while True:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if input_box.collidepoint(event.pos):
                 active = not active
+                color = color_active if active else color_inactive
             else:
                 active = False
-            color = color_active if active else color_inactive
+                color = color_active if active else color_inactive
+
+            if search_image_rect.collidepoint(event.pos) and text:
+                active = False
+                color = color_active if active else color_inactive
+                toponym_to_find = text
+                geocoder_params = {
+                    "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
+                    "geocode": toponym_to_find,
+                    "format": "json"}
+
+                response = requests.get(geocoder_api_server, params=geocoder_params)
+
+                if not response:
+                    pass
+
+                json_response = response.json()
+                try:
+                    toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
+                except:
+                    pass
+                toponym_coodrinates = toponym["Point"]["pos"]
+                toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
+                text = ''
+
+            if map_icon_rect.collidepoint(event.pos):
+                l = 'map'
+
+            if sat_icon_rect.collidepoint(event.pos):
+                l = 'sat'
+
+            if gib_icon_rect.collidepoint(event.pos):
+                l = 'sat,skl'
+
         if event.type == pygame.KEYDOWN:
             if active:
-                if event.key == pygame.K_RETURN:
-                    active = False
-                    color = color_active if active else color_inactive
-                    toponym_to_find = text
-                    geocoder_params = {
-                        "apikey": "40d1649f-0493-4b70-98ba-98533de7710b",
-                        "geocode": toponym_to_find,
-                        "format": "json"}
-
-                    response = requests.get(geocoder_api_server, params=geocoder_params)
-
-                    if not response:
-                        pass
-
-                    json_response = response.json()
-                    toponym = json_response["response"]["GeoObjectCollection"]["featureMember"][0]["GeoObject"]
-                    toponym_coodrinates = toponym["Point"]["pos"]
-                    toponym_longitude, toponym_lattitude = toponym_coodrinates.split(" ")
-                    text = ''
-                elif event.key == pygame.K_BACKSPACE:
+                if event.key == pygame.K_BACKSPACE:
                     text = text[:-1]
                 else:
                     text += event.unicode
@@ -102,20 +133,24 @@ while True:
     map_params = {
         "ll": ",".join([toponym_longitude, toponym_lattitude]),
         "spn": ",".join([str(delta), str(delta)]),
-        "l": "map"
+        "l": l
     }
     response = requests.get(map_api_server, params=map_params)
     map_image = pygame.image.load(BytesIO(response.content))
     map_image = pygame.transform.scale(map_image, (500, 500))
 
     # Draw.
-    screen.fill((0, 0, 0))
+    screen.fill((100, 100, 255))
     txt_surface = font.render(text, True, color)
     width = max(200, txt_surface.get_width() + 10)
     input_box.w = width
     screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
     pygame.draw.rect(screen, color, input_box, 2)
     screen.blit(map_image, (0, 150))
+    screen.blit(search_image, search_image_rect)
+    screen.blit(map_icon, map_icon_rect)
+    screen.blit(sat_icon, sat_icon_rect)
+    screen.blit(gib_icon, gib_icon_rect)
 
     pygame.display.flip()
     fpsClock.tick(fps)
