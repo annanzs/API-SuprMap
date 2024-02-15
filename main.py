@@ -11,7 +11,7 @@ toponym_to_find = 'россия'
 width, height = 800, 800
 screen = pygame.display.set_mode((width, height))
 font = pygame.font.Font(None, 32)
-input_box = pygame.Rect(50, 50, 150, 32)
+input_box = pygame.Rect(250, 50, 250, 42)
 color_inactive = pygame.Color('lightskyblue3')
 color_active = pygame.Color('dodgerblue2')
 color = color_inactive
@@ -55,7 +55,7 @@ response = requests.get(map_api_server, params=map_params)
 
 search_image = pygame.image.load('magnifying.png')
 search_image = pygame.transform.scale(search_image, (75, 75))
-search_image_rect = pygame.Rect((300, 25), (75, 75))
+search_image_rect = pygame.Rect((500, 25), (75, 75))
 map_image = pygame.image.load(BytesIO(response.content))
 map_icon = pygame.image.load('map.png')
 map_icon = pygame.transform.scale(map_icon, (75, 75))
@@ -66,9 +66,9 @@ sat_icon = pygame.transform.scale(sat_icon, (75, 75))
 gib_icon = pygame.image.load('gibrid.jpg')
 gib_icon = pygame.transform.scale(gib_icon, (75, 75))
 
-map_icon_rect = pygame.Rect((550, 262), (75, 75))
-sat_icon_rect = pygame.Rect((550, 362), (75, 75))
-gib_icon_rect = pygame.Rect((550, 462), (75, 75))
+map_icon_rect = pygame.Rect((650, 262), (75, 75))
+sat_icon_rect = pygame.Rect((650, 362), (75, 75))
+gib_icon_rect = pygame.Rect((650, 462), (75, 75))
 # Game loop.
 
 while True:
@@ -140,13 +140,13 @@ while True:
     map_image = pygame.transform.scale(map_image, (500, 500))
 
     # Draw.
-    screen.fill((100, 100, 255))
+    screen.fill((205, 92, 92))
     txt_surface = font.render(text, True, color)
     width = max(200, txt_surface.get_width() + 10)
     input_box.w = width
     screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
     pygame.draw.rect(screen, color, input_box, 2)
-    screen.blit(map_image, (0, 150))
+    screen.blit(map_image, (100, 150))
     screen.blit(search_image, search_image_rect)
     screen.blit(map_icon, map_icon_rect)
     screen.blit(sat_icon, sat_icon_rect)
