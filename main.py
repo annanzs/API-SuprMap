@@ -128,6 +128,14 @@ while True:
             if event.key == pygame.K_PAGEDOWN:
                 if delta < 81.92:
                     delta += delta
+            if event.key == pygame.K_UP and float(toponym_lattitude) < 85:
+                toponym_lattitude = str(float(toponym_lattitude) + delta)
+            if event.key == pygame.K_DOWN and float(toponym_lattitude) > -85:
+                toponym_lattitude = str(float(toponym_lattitude) - delta)
+            if event.key == pygame.K_RIGHT and float(toponym_longitude) < 85:
+                toponym_longitude = str(float(toponym_longitude) + delta)
+            if event.key == pygame.K_LEFT and float(toponym_longitude) > -85:
+                toponym_longitude = str(float(toponym_longitude) - delta)
 
     # Update.
     map_params = {
